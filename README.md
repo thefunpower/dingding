@@ -1,5 +1,17 @@
 # 钉钉
 
+## 安装 
+
+~~~
+composer require thefunpower/dingding
+~~~
+
+开发版 
+~~~
+"thefunpower/dingding": "dev-main"
+~~~
+
+
 ### 获取用户
 
 ~~~
