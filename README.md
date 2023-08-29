@@ -69,6 +69,14 @@ markdown语法说明如下
   \n  (建议\n前后分别加2个空格)
 ~~~
 
+### 原生发消息
+
+`$msg_param` 参数请参考 https://open.dingtalk.com/document/orgapp/message-types-and-data-format
+
+~~~
+send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 'sampleMarkdown')
+~~~
+
 
 
 ### 开源协议 
