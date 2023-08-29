@@ -32,8 +32,7 @@ print_r($res);
 
 https://open.dingtalk.com/document/isvapp/attendance-clock-in-record-is-open
 
-~~~ 
-get_ding_token($dd_app_key,$dd_app_secret); 
+~~~  
 get_ding_kq($opt = [
   'start' => '',
   'end'   => '',
