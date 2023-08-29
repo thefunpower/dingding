@@ -190,5 +190,5 @@ function send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 
 * 发送文本消息
 */
 function send_ding_notice_text($robot_code,$user_id = [], $title,$text){
-    return send_ding_notice($robot_code,$user_id = [], ['title'=>$title,'text'=>$text]);
+    return send_ding_notice($robot_code,$user_id, ['title'=>$title,'text'=>$text]);
 }
