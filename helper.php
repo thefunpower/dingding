@@ -235,8 +235,8 @@ function send_ding_notice_text($robot_code,$user_id = [], $title,$text){
 * ]
 */
 function get_ding_kq($opt = []){
-    $start = $opt['start']?:date('Y-m-d 00:00:00',time()-86400*7);
-    $end   = $opt['end']?:date('Y-m-d H:i:s');
+    $start = $opt['start']??date('Y-m-d 00:00:00',time()-86400*7);
+    $end   = $opt['end']??date('Y-m-d H:i:s');
     $all   = get_ding_users();
     $in    = [];
     foreach($all as $v){
