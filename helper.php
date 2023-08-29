@@ -163,22 +163,19 @@ function get_ding_robot_client(){
 }
 /**
 * 发送消息
+* @param $msg_param ['title'=>'','text'=>''];
 */
-function send_ding_notice($robot_code,$user_id = [], $title, $text){ 
+function send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 'sampleMarkdown'){ 
     global $ding_talk;
     global $ding_talk_token;
-    $msgParam = [
-        'title' => $title,
-        'text'  => $text,
-    ]; 
     $batchSendOTOHeaders = new AlibabaCloud\SDK\Dingtalk\Vrobot_1_0\Models\BatchSendOTOHeaders([]);
     $batchSendOTOHeaders->xAcsDingtalkAccessToken = $ding_talk_token;
     $batchSendOTORequest = new AlibabaCloud\SDK\Dingtalk\Vrobot_1_0\Models\BatchSendOTORequest([
         "robotCode" => $robot_code,
         "userIds"   => $user_id,
         //https://open.dingtalk.com/document/group/message-types-and-data-format
-        "msgKey" => "sampleMarkdown",
-        "msgParam" => json_encode($msgParam, JSON_UNESCAPED_UNICODE),
+        "msgKey"    => $msg_key,
+        "msgParam"  => json_encode($msg_param, JSON_UNESCAPED_UNICODE),
     ]);
     try {
         $res = get_ding_robot_client()->batchSendOTOWithOptions(
@@ -186,6 +183,12 @@ function send_ding_notice($robot_code,$user_id = [], $title, $text){
         );
         return true;
     } catch (Exception $e) {
-        print_r($e->getMessage());
+        
     } 
 } 
+/**
+* 发送文本消息
+*/
+function send_ding_notice_text($robot_code,$user_id = [], $title,$text){
+    return send_ding_notice($robot_code,$user_id = [], ['title'=>$title,'text'=>$text]);
+}

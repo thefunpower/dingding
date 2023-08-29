@@ -25,7 +25,7 @@ print_r($res);
 ~~~
 $title = "test";
 $text  = "这个是内容";
-send_ding_notice($robot_code='ding0uednrlb3kyef0xb',$user_id = ['0246365867749182'], $title, $text);
+send_ding_notice_text($robot_code='ding0uednrlb3kyef0xb',$user_id = ['0246365867749182'], $title, $text);
 ~~~
 
 markdown消息  $text 值如下所示
