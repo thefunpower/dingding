@@ -1,0 +1,21 @@
+{
+    "name": "thefunpower/dingding",
+    "type": "library",
+    "description": "钉钉",
+    "keywords": ["php"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ken.sun",
+            "email": "sunkangchina@163.com" 
+        }
+    ],
+    "require": {
+        "alibabacloud/dingtalk": "^2.0"
+    }, 
+    "autoload": { 
+        "files": [ 
+            "./helper.php"
+        ]
+    }
+}
