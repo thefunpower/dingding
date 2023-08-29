@@ -57,6 +57,39 @@ function ding_curl($uri , $data = []){
     return $res;
 }
 /**
+* 获取总人数
+*/
+function get_ding_user_count(){
+    $list = ding_curl("/topapi/user/count",[
+        'only_active'=>false,
+    ]);
+    return $list['result']['count']; 
+}
+/**
+* 操作员ID
+*/
+function get_ding_op_user_id(){
+    return get_ding_admin()[0];
+}
+/**
+* 获取管理员
+*/
+function get_ding_admin($is_ori = false){
+    $list = ding_curl("/topapi/user/listadmin",[
+        'a'=>1,
+    ])['result'];
+    if(!$is_ori){
+        $new_list = [];
+        if($list){
+            foreach($list as $v){
+                $new_list[] = $v['userid'];
+            }
+        }
+        return $new_list;
+    }
+    return $list; 
+}
+/**
 * 取部门列表
 */
 function get_ding_dept(){ 
@@ -73,10 +106,12 @@ function get_ding_dept(){
         $dept_id = $v['dept_id'];
         $res = get_ding_dept_next($dept_id);  
         $new_ids[] = $dept_id;
-        foreach($res as $id){
-            $new_ids[] = $id;
+        if($res){
+            foreach($res as $id){
+                $new_ids[] = $id;
+            } 
         } 
-    } 
+    }  
     return $new_ids; 
 }
 /**
@@ -191,4 +226,69 @@ function send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 
 */
 function send_ding_notice_text($robot_code,$user_id = [], $title,$text){
     return send_ding_notice($robot_code,$user_id, ['title'=>$title,'text'=>$text]);
+}
+/**
+* 获取考勤信息
+* [
+*   'start'=>'',
+*   'end'  =>'',
+* ]
+*/
+function get_ding_kq($opt = []){
+    $start = $opt['start']?:date('Y-m-d 00:00:00',time()-86400*7);
+    $end   = $opt['end']?:date('Y-m-d H:i:s');
+    $all   = get_ding_users();
+    $in    = [];
+    foreach($all as $v){
+        $userid = $v['userid'];
+        $group_id = get_ding_kq_group_id_by_userid($userid);
+        if($group_id){
+            $in[] = $userid; 
+        } 
+    } 
+    $res = ding_curl('/attendance/listRecord', [ 
+        'checkDateFrom' => $start,
+        'checkDateTo'   => $end,
+        'userIds'       => $in, 
+    ]);  
+    if($res){
+        $all = $res['recordresult']; 
+        foreach($all as &$v){
+            $v['sign_time'] = date("Y-m-d H:i:s",$v['userCheckTime']/1000);
+            $v['sign_day']  = date("Y-m-d",$v['userCheckTime']/1000);
+            $user_id = $v['userId'];
+            $v['user_info'] = get_ding_user_info($user_id);
+        }
+    }    
+    return $all;     
+}
+/**
+* 取用户所在考勤组group_id
+*/
+function get_ding_kq_group_id_by_userid($userid ){
+    $res = ding_curl('/topapi/attendance/getusergroup', [ 
+        'userid'      => $userid,
+        'op_user_id'  => get_ding_op_user_id(), 
+    ]);
+    if($res && is_array($res) && $res['result']){
+        return $res['result']['group_id'];
+    } 
+} 
+/**
+* 取用户详情
+*/
+function get_ding_user_info($user_id){
+    static $_ding_cur_user;
+    if(isset($_ding_cur_user[$user_id])){
+        return $_ding_cur_user[$user_id];
+    }
+    $res = ding_curl('/topapi/v2/user/get', [ 
+        'userid' => $user_id, 
+    ]);
+    if($res && is_array($res) && $res['result']){
+        $_ding_cur_user[$user_id] =  $res['result'];
+    }  else {
+        $_ding_cur_user[$user_id] = [];
+    }
+    return $_ding_cur_user[$user_id];
 }

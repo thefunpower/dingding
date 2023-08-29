@@ -11,14 +11,34 @@ composer require thefunpower/dingding
 "thefunpower/dingding": "dev-main"
 ~~~
 
+时区
 
-### 获取用户
+~~~
+date_default_timezone_set('PRC');
+set_time_limit(-1); 
+~~~
 
+
+### 获取用户  
 ~~~
 get_ding_token($dd_app_key,$dd_app_secret); 
 $res = get_ding_users();
 print_r($res); 
 ~~~
+
+### 考勤
+
+限制7天，格式 YYYY-MM-DD hh:ii:ss
+
+https://open.dingtalk.com/document/isvapp/attendance-clock-in-record-is-open
+
+~~~ 
+get_ding_token($dd_app_key,$dd_app_secret); 
+get_ding_kq($opt = [
+  'start' => '',
+  'end'   => '',
+]);
+~~~~
 
 ### 发送消息
 
