@@ -11,10 +11,17 @@
 */ 
 function get_ding_token($dd_app_key,$dd_app_secret){
     global $ding_talk,$ding_talk_token;
+    $key = "ding_token:".$dd_app_key.$dd_app_secret; 
     $c = new Darabonba\OpenApi\Models\Config([]);
     $c->protocol = "https";
     $c->regionId = "central";
-    $ding_talk =  new AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Dingtalk($c); 
+    $ding_talk =  new AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Dingtalk($c);  
+    if(function_exists('cache')){
+        $data = cache($key);
+        if($data){
+            return $data;    
+        }        
+    } 
     $getAccessTokenRequest = new AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Models\GetAccessTokenRequest([
         "appKey"    => $dd_app_key,
         "appSecret" => $dd_app_secret
@@ -22,6 +29,9 @@ function get_ding_token($dd_app_key,$dd_app_secret){
     $res             = $ding_talk->getAccessToken($getAccessTokenRequest);
     $ding_talk_token = $res->body->accessToken; 
     $time            = $res->body->expireIn; 
+    if(function_exists('cache') && $ding_talk_token && $time){
+        cache($key,$ding_talk_token,$time-10); 
+    }
     return $ding_talk_token;
 } 
 /**
