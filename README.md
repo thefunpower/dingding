@@ -78,6 +78,18 @@ send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 'sampleMa
 ~~~
 
 
+# 创建钉钉应用
+
+[访问钉钉](https://open-dev.dingtalk.com/fe/app#/corp/app)
+
+创建H5微应用
+
+在【应用信息】中找到  【AppKey】  【AppSecret】 
+
+在【机器人与消息推送】  复制 RobotCode
+
+
+
 
 ### 开源协议 
 
