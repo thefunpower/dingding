@@ -35,10 +35,18 @@ function get_ding_token($dd_app_key,$dd_app_secret){
     return $ding_talk_token;
 } 
 /**
+* 返回错误信息
+*/
+function get_ding_error()
+{
+    global $ding_error;
+    return $ding_error; 
+}
+/**
 * 向钉钉发起CURL请求
 */ 
 function ding_curl($uri , $data = []){
-    global $ding_talk_token;
+    global $ding_talk_token,$ding_error;
     $client = new GuzzleHttp\Client([
         'base_uri' => 'https://oapi.dingtalk.com',
         'timeout' => 30,
@@ -52,7 +60,11 @@ function ding_curl($uri , $data = []){
         ]);
     $res = json_decode($res->getBody()->getContents(), true);
     if($res['errcode'] != 0){
-        throw new Exception($res['errmsg']); 
+        $ding_error = $res['errmsg'];
+        if(function_exists("trace")){
+            trace($ding_error,'error'); 
+        }
+        return false;
     }
     return $res;
 }
@@ -92,7 +104,7 @@ function get_ding_admin($is_ori = false){
 /**
 * 取部门列表
 */
-function get_ding_dept(){ 
+function get_ding_dept_id(){ 
     $list = ding_curl('/topapi/v2/department/listsub', [ 
         'dept_id'  => 1,
         'language' => 'zh_CN'
@@ -104,7 +116,7 @@ function get_ding_dept(){
     $new_ids = [];
     foreach($all as $v){
         $dept_id = $v['dept_id'];
-        $res = get_ding_dept_next($dept_id);  
+        $res = get_ding_dept_id_next($dept_id);  
         $new_ids[] = $dept_id;
         if($res){
             foreach($res as $id){
@@ -117,7 +129,7 @@ function get_ding_dept(){
 /**
 * 取子部门
 */
-function get_ding_dept_next($dept_id){
+function get_ding_dept_id_next($dept_id){
     static $_ding_dept_id_in;
     $res = ding_curl('/topapi/v2/department/listsubid',[
         'dept_id'  => $dept_id,
@@ -130,7 +142,7 @@ function get_ding_dept_next($dept_id){
             $_ding_dept_id_in = array_merge($_ding_dept_id_in,$list);
         }
         foreach($list as $id){
-            get_ding_dept_next($id);    
+            get_ding_dept_id_next($id);    
         } 
     }
     return $_ding_dept_id_in;
@@ -143,7 +155,7 @@ function get_ding_dept_next($dept_id){
 */
 function get_ding_users(){
     $list = [];
-    $all = get_ding_dept();
+    $all = get_ding_dept_id();
     foreach($all as $dept_id){
         $users = _get_ding_users($dept_id);
         foreach($users as $v){
@@ -292,3 +304,166 @@ function get_ding_user_info($user_id){
     }
     return $_ding_cur_user[$user_id];
 }
+/**
+* 取部门信息
+*/
+function get_ding_dept_info($dept_id){
+    $res = ding_curl('/topapi/v2/department/get', [ 
+        'dept_id' => $dept_id, 
+    ]);
+    return $res['result'];
+} 
+/**
+* 取所有部门列表信息
+*/
+function get_ding_depts()
+{
+    $all  = get_ding_dept_id();
+    $list = [];
+    foreach($all as $v){
+        $list[] = get_ding_dept_info($v);
+    }
+    return $list;
+}
+/**
+* 创建部门
+*/
+function ding_create_dept($name)
+{
+    $res = ding_curl('/topapi/v2/department/create', [ 
+        'name'     => $name, 
+        'parent_id'=> 1,
+    ]);
+    return $res['result']['dept_id']; 
+}
+/**
+* 更新部门
+*/
+function ding_update_dept($old_name,$new_name)
+{
+    if(is_string($old_name)){
+        $dept_id = get_ding_dept_id_by_name($old_name);
+        if(!$dept_id){
+            return false;
+        }
+    } else {
+        $dept_id = $old_name;
+    } 
+    $res = ding_curl('/topapi/v2/department/update', [ 
+        'dept_id' => $dept_id, 
+        'name'    => $new_name,
+    ]);
+    if($res && $res['errcode'] == 0){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+* 删除部门
+*/
+function ding_del_dept($old_name,$new_name)
+{
+    if(is_string($old_name)){
+        $dept_id = get_ding_dept_id_by_name($old_name);
+        if(!$dept_id){
+            return false;
+        }
+    } else {
+        $dept_id = $old_name;
+    } 
+    $res = ding_curl('/topapi/v2/department/delete', [ 
+        'dept_id' => $dept_id,  
+    ]);
+    if($res && $res['errcode'] == 0){
+        return true;
+    } else {
+        return false;
+    }
+} 
+
+/**
+* 根据部门名称取部门ID
+*/
+function get_ding_dept_id_by_name($name){
+    $all = get_ding_depts();
+    $dept_id = '';
+    foreach($all as $v){
+        if($v['name'] == $name){
+            $dept_id = $v['dept_id'];
+            break;
+        }
+    }
+    return $dept_id;
+}
+
+
+
+/**
+* 创建用户
+* [
+*    'userid'=>'',
+*    'name'=>'',
+*    'mobile'=>'', 
+*    'dept_name'=>'',
+* ]
+* https://open.dingtalk.com/document/orgapp/user-information-creation
+*/
+function ding_create_user($arr = [])
+{ 
+    if(isset($arr['dept_name'])){
+        $dept_name = $arr['dept_name'];
+        $arr['dept_id_list'] = get_ding_dept_id_by_name($dept_name);
+    } 
+    if(!isset($arr['name']) || !isset($arr['mobile']) || !$arr['dept_name']){
+        return false;
+    }
+    $arr['parent_id'] = 1;
+    $res = ding_curl('/topapi/v2/user/create',$arr);
+    if($res && $res['errcode'] == 0){
+        return $res['result'];
+    } else {
+        return false;
+    }
+}
+/**
+* 更新用户
+*/
+function ding_update_user($name_or_email_or_mobile,$arr = [])
+{
+    $name    = $name_or_email_or_mobile;
+    $arr['userid'] = get_ding_user_id($name);
+    if(isset($arr['dept_name'])){
+        $dept_name = $arr['dept_name']; 
+        $arr['dept_id_list'] = get_ding_dept_id_by_name($dept_name);
+    } 
+    if(!isset($arr['name']) || !$arr['userid']){
+        return false;
+    }  
+    $res = ding_curl('/topapi/v2/user/update',$arr); 
+    if($res && $res['errcode'] == 0){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+* 根据姓名取用户ID
+*/
+function get_ding_user_id($name_or_email_or_mobile,$show_full = false){
+    $name = $name_or_email_or_mobile;
+    $all  = get_ding_users();  
+    foreach($all as $v){
+        if($v['mobile'] == $name || $v['email'] == $name  || $v['name'] == $name ){
+            $user_id = $v['userid'];
+            if($show_full){
+                return $v;
+            }else {
+                return $user_id;
+            }
+            break;
+        }
+    } 
+} 
