@@ -165,6 +165,45 @@ send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 'sampleMa
 echo get_ding_error();
 ~~~
 
+### 类调用 
+1.配置不同的分组信息
+~~~
+$dd_app_key = '';
+$dd_app_secret = '';
+
+DingDingHelper::set('default',$dd_app_key,$dd_app_secret);
+
+$dd_app_key = '';
+$dd_app_secret = '';
+
+DingDingHelper::set('test',$dd_app_key,$dd_app_secret);
+~~~
+2.调用分组信息
+~~~ 
+$res = DingDingHelper::get('default')->get_ding_dept_id_by_name('部门名称'); 
+$res = DingDingHelper::get('test')->get_ding_dept_id_by_name('部门名称');
+~~~ 
+
+2-1.类继承方式调用 
+~~~
+class A extends DingDingClass{
+  protected $group_name = 'default'; 
+  
+}
+
+class B extends DingDingClass{
+  protected $group_name = 'test';  
+}
+~~~
+调用分组信息
+~~~
+$a = new A;
+$B = new B; 
+$a->get_ding_dept_id_by_name('部门名称');
+$b->get_ding_dept_id_by_name('部门名称');
+$a->get_ding_dept_id_by_name('部门名称');
+~~~ 
+
 
 ### 开源协议 
 

@@ -236,7 +236,7 @@ function send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 
 /**
 * 发送文本消息
 */
-function send_ding_notice_text($robot_code,$user_id = [], $title,$text){
+function send_ding_notice_text($robot_code,$user_id = [], $title = '',$text = ''){
     return send_ding_notice($robot_code,$user_id, ['title'=>$title,'text'=>$text]);
 }
 /**
@@ -467,3 +467,59 @@ function get_ding_user_id($name_or_email_or_mobile,$show_full = false){
         }
     } 
 } 
+
+/**
+* 继承辅助类
+*/
+class DingDingClass extends DingDingHelper{
+    protected $group_name; 
+    public function __construct(){
+        self::get($this->group_name);
+    }
+}
+/**
+* 辅助类
+*/
+class DingDingHelper{    
+    public static $group;
+    public static $init;    
+    /**
+    * 实例
+    */
+    public static function instence(){ 
+        if(!static::$init){
+            static::$init = new Self;
+        }
+        return self::$init;
+    }
+    /**
+    * 获取分组
+    */
+    public static function get($group_name = '')
+    {
+        $instence = self::instence();
+        global $ding_talk_token; 
+        $group_name = $group_name??$instence->group_name;
+        $ding_talk_token = static::$group[$group_name];  
+        return $instence;
+    }
+    /**
+    * 配置分组
+    */
+    public static function set($group_name,$dd_app_key,$dd_app_secret)
+    { 
+        static::$group[$group_name] = get_ding_token($dd_app_key,$dd_app_secret);
+    }
+    /**
+    * 调用方法
+    */
+    public  function __call($method,$args){ 
+        if(function_exists($method)){ 
+           $ret =  call_user_func_array($method,$args);
+           return $ret;
+        }else {
+            echo "未找到对应函数";exit;
+        }
+    }
+}
+
