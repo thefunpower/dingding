@@ -17,9 +17,9 @@ function get_ding_token($dd_app_key,$dd_app_secret){
     $c->regionId = "central";
     $ding_talk =  new AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Dingtalk($c);  
     if(function_exists('cache')){
-        $data = cache($key);
-        if($data){
-            return $data;    
+        $ding_talk_token = cache($key);
+        if($ding_talk_token){
+            return $ding_talk_token;    
         }        
     } 
     $getAccessTokenRequest = new AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Models\GetAccessTokenRequest([
