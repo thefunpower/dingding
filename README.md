@@ -17,11 +17,15 @@ composer require thefunpower/dingding
 date_default_timezone_set('PRC');
 set_time_limit(-1); 
 ~~~
+# 常见用法
 
-
-### 获取用户列表   
+### 初始化
 ~~~
 get_ding_token($dd_app_key,$dd_app_secret); 
+~~~
+
+### 获取用户列表   
+~~~ 
 $res = get_ding_users();
 print_r($res); 
 ~~~
@@ -165,7 +169,10 @@ send_ding_notice($robot_code,$user_id = [], $msg_param = [],$msg_key = 'sampleMa
 echo get_ding_error();
 ~~~
 
-### 类调用 
+# 类调用方法
+
+一般不用看这里
+
 1.配置不同的分组信息
 ~~~
 $dd_app_key = '';
