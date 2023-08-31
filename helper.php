@@ -169,23 +169,17 @@ function get_ding_users(){
 /**
 * 取部门下的用户
 */
-function _get_ding_users($dept_id,$size=10){
-    static $ding_user;
-    if(!isset($ding_user[$dept_id]['cursor'])){
-        $ding_user[$dept_id]['cursor'] = 0;    
-    }else{
-        $ding_user[$dept_id]['cursor']++;
-    } 
+function _get_ding_users($dept_id,$size=10,$cursor = 0){
+    static $ding_user; 
     $res = ding_curl('/topapi/v2/user/list', [ 
         'dept_id' => $dept_id,
-        'cursor'  => $ding_user[$dept_id]['cursor'],
+        'cursor'  => $cursor,
         'size'    => $size
     ]);  
-    if($res && $res['result']){
-        $res = $res['result'];
-    }else{
+    if($res['errcode'] != 0){ 
         return $ding_user[$dept_id]['user'];
     }
+    $res  = $res['result'];
     $list = $res['list'];
     if($list){
         if(!isset($ding_user[$dept_id]['user'])){
@@ -194,9 +188,9 @@ function _get_ding_users($dept_id,$size=10){
             $ding_user[$dept_id]['user'] = array_merge($ding_user[$dept_id]['user'],$list);
         }
     }
-    $has_more = $res['has_more'];
-    if($has_more){
-        _get_ding_users($dept_id,$size);
+    $next_cursor = $res['next_cursor'];
+    if($next_cursor){
+        _get_ding_users($dept_id,$size,$next_cursor);
     }
     return $ding_user[$dept_id]['user']??[];
 }
