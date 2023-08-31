@@ -153,11 +153,11 @@ function get_ding_dept_id_next($dept_id){
 * 取所有用户信息
 * name mobile avatar admin active
 */
-function get_ding_users(){
+function get_ding_users($size = 100){
     $list = [];
     $all = get_ding_dept_id();
     foreach($all as $dept_id){
-        $users = _get_ding_users($dept_id);
+        $users = _get_ding_users($dept_id,$size);
         if($users){
             foreach($users as $v){
                 $list[$v['userid']] = $v;
