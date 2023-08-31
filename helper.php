@@ -133,7 +133,7 @@ function get_ding_users($size = 100){
     $list = [];
     $all = get_ding_dept_id();
     foreach($all as $dept_id){
-        $users = _get_ding_users($dept_id,$size);
+        $users = get_ding_dept_users($dept_id,$size);
         if($users){
             foreach($users as $v){
                 $list[$v['userid']] = $v;
@@ -145,13 +145,16 @@ function get_ding_users($size = 100){
 /**
 * 取部门下的用户
 */
-function _get_ding_users($dept_id,$size=10,$cursor = 0){
+function get_ding_dept_users($dept_id,$size=10,$cursor = 0){
     static $ding_user; 
+    if($cursor == 0){
+        $ding_user = [];
+    }
     $res = ding_curl('/topapi/v2/user/list', [ 
         'dept_id' => $dept_id,
         'cursor'  => $cursor,
         'size'    => $size
-    ]);  
+    ]);   
     if($res['errcode'] != 0){ 
         return $ding_user[$dept_id]['user'];
     }
@@ -166,7 +169,7 @@ function _get_ding_users($dept_id,$size=10,$cursor = 0){
     }
     $next_cursor = $res['next_cursor']??"";
     if($next_cursor){
-        _get_ding_users($dept_id,$size,$next_cursor);
+        get_ding_dept_users($dept_id,$size,$next_cursor);
     }
     return $ding_user[$dept_id]['user']??[];
 } 
@@ -288,7 +291,7 @@ function get_ding_dept_info($dept_id){
 /**
 * 取所有部门列表信息
 */
-function get_ding_depts($is_tree = false)
+function get_ding_depts($is_tree = false,$is_user = false)
 {
     $all  = get_ding_dept_id();
     if(!$all){
@@ -296,7 +299,11 @@ function get_ding_depts($is_tree = false)
     }
     $list = [];
     foreach($all as $v){
-        $list[] = get_ding_dept_info($v);
+        $row = get_ding_dept_info($v);
+        if($is_user){
+            $row['users'] = get_ding_dept_users($row['dept_id']);
+        }
+        $list[] = $row;
     }
     if($is_tree){
         return dingding_array_to_tree($list,'dept_id','parent_id','children',1);

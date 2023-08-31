@@ -30,8 +30,20 @@ $res = get_ding_users();
 print_r($res); 
 ~~~
 
-### 创建部门
+### 部门列表 
+~~~
+get_ding_depts($is_tree = false,$is_user = false);
+~~~
+`$is_tree` 是否树型显示
+`$is_user` 是否显示部门下员工信息
 
+### 取某个部门下的员工
+~~~
+get_ding_dept_users($dept_id)
+~~~
+
+
+### 创建部门 
 ~~~
 ding_create_dept('演示部门创建'); 
 ~~~
