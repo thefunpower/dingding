@@ -34,7 +34,9 @@ print_r($res);
 ~~~
 get_ding_depts($is_tree = false,$is_user = false);
 ~~~
+
 `$is_tree` 是否树型显示
+
 `$is_user` 是否显示部门下员工信息
 
 ### 取某个部门下的员工
