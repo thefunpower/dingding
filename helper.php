@@ -104,11 +104,14 @@ function get_ding_admin($is_ori = false){
 /**
 * 取部门列表
 */  
-function get_ding_dept_id($flag = false,$dept_id = 1){
+function get_ding_dept_id($dept_id = 1){
     static $_ding_dept_id_in;
+    if($dept_id == 1){
+        $_ding_dept_id_in = [];
+    }
     $res = ding_curl('/topapi/v2/department/listsubid',[
         'dept_id'  => $dept_id,
-    ]);
+    ]); 
     $list = $res['result']['dept_id_list']??[];
     if($list){
         if(!$_ding_dept_id_in){
@@ -285,12 +288,18 @@ function get_ding_dept_info($dept_id){
 /**
 * 取所有部门列表信息
 */
-function get_ding_depts()
+function get_ding_depts($is_tree = false)
 {
     $all  = get_ding_dept_id();
+    if(!$all){
+        return;
+    }
     $list = [];
     foreach($all as $v){
         $list[] = get_ding_dept_info($v);
+    }
+    if($is_tree){
+        return dingding_array_to_tree($list,'dept_id','parent_id','children',1);
     }
     return $list;
 }
@@ -492,3 +501,53 @@ class DingDingHelper{
     }
 }
 
+
+
+/**
+ * 数组转tree 
+ * 
+ * 输入$list 
+ * [
+ *   {id:1,pid:0,其他字段},
+ *   {id:2,pid:1,其他字段},
+ *   {id:3,pid:1,其他字段},
+ * ]
+ * 输出 
+ * [
+ *   [
+ *      id:1,
+ *      pid:0,
+ *      其他字段,
+ *      children:[
+ *           {id:2,pid:1,其他字段},
+ *           {id:3,pid:1,其他字段},
+ *      ]
+ *   ]
+ * ]
+ * 
+ */
+function dingding_array_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'children', $root = 0, $my_id = '')
+{
+    $tree = array();
+    if (is_array($list)) {
+        $refer = array();
+        foreach ($list as $key => $data) {
+            $refer[$data[$pk]] = &$list[$key];
+        }
+        foreach ($list as $key => $data) {
+            $parentId = $data[$pid];
+            if ($root == $parentId) {
+                $tree[$data[$pk]] = &$list[$key];
+            } else {
+                if (isset($refer[$parentId])) {
+                    $parent = &$refer[$parentId];
+                    if ($my_id && $my_id == $list[$key]['id']) {
+                    } else {
+                        $parent[$child][] = &$list[$key];
+                    }
+                }
+            }
+        }
+    }
+    return $tree;
+}
