@@ -205,7 +205,7 @@ class B extends DingDingClass{
 调用分组信息
 ~~~
 $a = new A;
-$B = new B; 
+$b = new B; 
 $a->get_ding_dept_id_by_name('部门名称');
 $b->get_ding_dept_id_by_name('部门名称');
 $a->get_ding_dept_id_by_name('部门名称');
