@@ -188,7 +188,7 @@ function _get_ding_users($dept_id,$size=10,$cursor = 0){
             $ding_user[$dept_id]['user'] = array_merge($ding_user[$dept_id]['user'],$list);
         }
     }
-    $next_cursor = $res['next_cursor'];
+    $next_cursor = $res['next_cursor']??"";
     if($next_cursor){
         _get_ding_users($dept_id,$size,$next_cursor);
     }
