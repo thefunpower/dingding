@@ -158,9 +158,11 @@ function get_ding_users(){
     $all = get_ding_dept_id();
     foreach($all as $dept_id){
         $users = _get_ding_users($dept_id);
-        foreach($users as $v){
-            $list[$v['userid']] = $v;
-        }
+        if($users){
+            foreach($users as $v){
+                $list[$v['userid']] = $v;
+            }
+        } 
     }
     return $list;
 }
@@ -196,7 +198,7 @@ function _get_ding_users($dept_id,$size=10){
     if($has_more){
         _get_ding_users($dept_id,$size);
     }
-    return $ding_user[$dept_id]['user'];
+    return $ding_user[$dept_id]['user']??[];
 }
  
 /**
