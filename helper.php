@@ -103,38 +103,13 @@ function get_ding_admin($is_ori = false){
 }
 /**
 * 取部门列表
-*/
-function get_ding_dept_id(){ 
-    $list = ding_curl('/topapi/v2/department/listsub', [ 
-        'dept_id'  => 1,
-        'language' => 'zh_CN'
-    ]); 
-    $all = $list['result']; 
-    if($list['errcode']!=0){
-        return;
-    }
-    $new_ids = [];
-    foreach($all as $v){
-        $dept_id = $v['dept_id'];
-        $res = get_ding_dept_id_next($dept_id);  
-        $new_ids[] = $dept_id;
-        if($res){
-            foreach($res as $id){
-                $new_ids[] = $id;
-            } 
-        } 
-    }  
-    return $new_ids; 
-}
-/**
-* 取子部门
-*/
-function get_ding_dept_id_next($dept_id){
+*/  
+function get_ding_dept_id($flag = false,$dept_id = 1){
     static $_ding_dept_id_in;
     $res = ding_curl('/topapi/v2/department/listsubid',[
         'dept_id'  => $dept_id,
     ]);
-    $list = $res['result']['dept_id_list'];
+    $list = $res['result']['dept_id_list']??[];
     if($list){
         if(!$_ding_dept_id_in){
             $_ding_dept_id_in = $list;
@@ -142,13 +117,11 @@ function get_ding_dept_id_next($dept_id){
             $_ding_dept_id_in = array_merge($_ding_dept_id_in,$list);
         }
         foreach($list as $id){
-            get_ding_dept_id_next($id);    
+            get_ding_dept_id($id);    
         } 
     }
     return $_ding_dept_id_in;
-}
-
-
+}   
 /**
 * 取所有用户信息
 * name mobile avatar admin active
@@ -193,7 +166,7 @@ function _get_ding_users($dept_id,$size=10,$cursor = 0){
         _get_ding_users($dept_id,$size,$next_cursor);
     }
     return $ding_user[$dept_id]['user']??[];
-}
+} 
  
 /**
 * 钉钉机器人client
