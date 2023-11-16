@@ -1,9 +1,4 @@
 <?php 
-/*
-    Copyright (c) 2023-2033, All rights reserved.
-    This is  a library, use is under MIT license.
-*/
-
 /**
 * 内部应用access_token
 * https://open.dingtalk.com/
