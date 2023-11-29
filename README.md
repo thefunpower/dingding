@@ -228,4 +228,4 @@ $a->get_ding_dept_id_by_name('部门名称');
 
 ### 开源协议 
 
-The [MIT](LICENSE) License (MIT)
+[Apache License 2.0](LICENSE)
